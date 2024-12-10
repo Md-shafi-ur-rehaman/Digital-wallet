@@ -18,22 +18,13 @@ const TransactionSchema = new mongoose.Schema({
   },
   transactionType: {
     type: String,
-    enum: ['SEND', 'RECEIVE', 'DEPOSIT', 'WITHDRAWAL'],
-    required: true
-  },
-  method: {
-    type: String,
-    enum: ['QR', 'PHONE', 'EMAIL', 'INTERNAL'],
-    required: true
+    enum: ['SEND', 'RECEIVE'],
+    required: false
   },
   status: {
     type: String,
     enum: ['PENDING', 'COMPLETED', 'FAILED'],
     default: 'PENDING'
-  },
-  transactionFee: {
-    type: Number,
-    default: 0
   },
   metadata: {
     ipAddress: String,
