@@ -20,16 +20,18 @@ router.get('/balance', userVerification, async (req, res)=>{
 })
 
 router.post('/send', userVerification, async (req, res)=>{
-    const {email, phoneNumber, amount} = req.body;
+    const {email, phoneNumber, amount, pin} = req.body;
     
     const session = mongoose.startSession();
     
-    const createTransaction = async (sender, recipient, amount)=>{
-        const transaction = await Transaction.create({
+    const createTransaction = async (sender, recipient, amount, type, status)=>{
+        await Transaction.create({
             sender,
             recipient,
             amount,
-        },{session});
+            transactionType:type,
+            status:status,
+        });
     }
 
     try{   
@@ -39,28 +41,43 @@ router.post('/send', userVerification, async (req, res)=>{
         })
         
         if(!reciever){
-            return res.status(401).json(
-                { message:'Invalid receiver'}
-            )
+            return res.status(401).json({ 
+                success:false,
+                message:'Invalid reciever'
+            })
         }
         const sender_wallet = await Wallet.findOne({user_id: req.user._id}) //.session(session);
-        const reciever_wallet = await Wallet.findOne({user_id: reciever._id}) //.session(session));
+        const reciever_wallet = await Wallet.findOne({user_id: reciever._id}) //.session(session);
+
         if(!sender_wallet || !reciever_wallet) {
-            return res.status(401).json(
-                { message:'Invalid Wallet'}
-            )
+            return res.status(401).json({ 
+                success:false,
+                message:'Invalid Wallets'
+            })
         }
-        console.log(reciever_wallet.balance);
+
         if(sender_wallet.balance < amount){
-            throw new Error("Ineffient amount");
+            return res.status(401).json({ 
+                success:false,
+                message:'Inefficeint balance'
+            })
         }
+
+        if(pin != req.user.pin){
+            return res.status(401).json({ 
+                success:false,
+                message:'Wrong pin'
+            })
+        }
+
         sender_wallet.balance -= amount;
         reciever_wallet.balance += amount;
 
         await sender_wallet.save()
         await reciever_wallet.save()
         
-        //createTransaction(req.user._id, reciever._id, amount);
+        createTransaction(req.user._id, reciever._id, amount, 'SEND', 'COMPLETED');
+
         
 
         // Commit transaction
@@ -68,7 +85,6 @@ router.post('/send', userVerification, async (req, res)=>{
 
         return res.status(200).json({
           success: true,
-          //transaction: transaction,
           message: 'Transfer successful'
         })
 
@@ -76,18 +92,13 @@ router.post('/send', userVerification, async (req, res)=>{
         const reciever = await User.findOne({
             $or:[{email}, {phoneNumber}]
         })
-        // const transaction = await Transaction.create({
-        //     sender: req.user._id,
-        //     recipient: reciever._id,
-        //     amount: amount,
-        //     transactionType: "SEND",
-        //     status:"FAILED"
-        // }, {session})
-        
+
+        createTransaction(req.user._id, reciever._id, amount, 'SEND', 'FAILED');
+
         //await session.abortTransaction();
         return res.status(401).json({
             success:false,
-            message:"Transaction failed"
+            message:"Transaction failed",
         })
     }
     finally{

@@ -10,7 +10,12 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true, 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+}));
 app.use(helmet());
 app.use(express.json());
 app.use(cookieParser());

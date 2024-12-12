@@ -17,10 +17,19 @@ const signupBody = zod.object({
 });
 
 router.post("/register", async (req, res) => {
-    const { success } = signupBody.safeParse(req.body);
-    if (!success) {
+    // const { success } = signupBody.safeParse(req.body);
+    // if (!success) {
+    //   return res.status(411).json({
+    //     message: "Incorrect inputs",
+    //   });
+    // }
+
+    const {email, name, password, phoneNumber, pin} = req.body;
+
+    if(!email || !name || !password || !phoneNumber || !pin) {
       return res.status(411).json({
-        message: "Incorrect inputs",
+        staus:false,
+        message: "all inputs are required",
       });
     }
   
@@ -30,11 +39,12 @@ router.post("/register", async (req, res) => {
   
     if (existingUser) {
       return res.status(411).json({
+        status:false,
         message: "Email already taken",
       });
     }
   
-    const { email, name, phoneNumber, password, pin } = req.body;
+    
   
     const newUser = await User.create({email,name,phoneNumber,password,pin});
     const newWallet = await Wallet.create({user_id:newUser._id});
@@ -45,6 +55,7 @@ router.post("/register", async (req, res) => {
       httpOnly: false,
     });
     res.status(200).json({
+      status:true,
       message: "User created successfully",
       token: token,
     });
@@ -56,15 +67,16 @@ const signinBody = zod.object({
 });
 
 router.post('/login', async (req, res)=>{
-    const { success } = signinBody.safeParse(req.body);
-    if (!success) {
-      return res.status(411).json({
-        message: "Incorrect inputs",
-      });
-    }
+    // const { success } = signinBody.safeParse(req.body);
+    // if (!success) {
+    //   return res.status(411).json({
+    //     message: "Incorrect inputs",
+    //   });
+    // }
     const {email, password} = req.body;
 
     const user = await User.findOne({email});
+    
     
     if (!user) {
       return res.status(411).json({
