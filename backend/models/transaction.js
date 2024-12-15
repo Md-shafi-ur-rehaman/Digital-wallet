@@ -1,20 +1,36 @@
 const mongoose = require('mongoose');
 
 const TransactionSchema = new mongoose.Schema({
-  sender: {
+  sender_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  recipient: {
+  senderName:{
+    type:String,
+    required:true,
+  },
+  recipient_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
+  },
+  recipientName:{
+    type:String,
+    required:true,
   },
   amount: {
     type: Number,
     required: true,
     min: 0
+  },
+  senderPhoneNumber:{
+    type: Number,
+    required: true,
+  },
+  recieverPhoneNumber:{
+    type: Number,
+    required: true,
   },
   transactionType: {
     type: String,

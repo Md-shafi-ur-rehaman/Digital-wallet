@@ -21,16 +21,15 @@ const verifyUserToken = async (req, res, next) => {
     const verified = jwt.verify(token, process.env.JWT_SECRET);
     
     
-
     // If verified, find user (assuming you have a user model)
-    const user = await User.findOne({email: verified.email}).select('-password');
-
+    const user = await User.findOne({email: verified.email}).select('-password').select('-pin');
+    
     if (!user) {
       return res.status(404).json({ 
         success: false, 
         message: 'User not found' 
       });
-    }
+    };
 
     // Attach user to request object
     req.user = user;

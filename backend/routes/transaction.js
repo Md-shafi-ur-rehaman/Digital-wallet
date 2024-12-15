@@ -9,25 +9,36 @@ const mongoose = require('mongoose')
 
 router.get('/balance', userVerification, async (req, res)=>{
     // const token = req.cookies.token;
-    const user_id = req.user._id;
-    const userWallet = await Wallet.findOne({user_id});
-    
-    res.status(200).json({
-        balance: userWallet.balance,
-        success: true
-    })
+    try{ 
+        const user_id = req.user._id;
+        const userWallet = await Wallet.findOne({user_id});
+        
+        res.status(200).json({
+            balance: userWallet.balance,
+            success: true
+        })
+    }catch(err){
+        res.status(401).json({
+            success:false,
+            message:"Error while fetching balance"
+        })
+    }
     
 })
 
 router.post('/send', userVerification, async (req, res)=>{
     const {email, phoneNumber, amount, pin} = req.body;
     
-    const session = mongoose.startSession();
+    // const session = mongoose.startSession();
     
-    const createTransaction = async (sender, recipient, amount, type, status)=>{
+    const createTransaction = async (sender_id, senderName, recipient_id, recipientName, senderPhoneNumber, recieverPhoneNumber, amount, type, status)=>{
         await Transaction.create({
-            sender,
-            recipient,
+            sender_id,
+            senderName,
+            recipient_id,
+            recipientName,
+            senderPhoneNumber,
+            recieverPhoneNumber,
             amount,
             transactionType:type,
             status:status,
@@ -37,7 +48,10 @@ router.post('/send', userVerification, async (req, res)=>{
     try{   
         //session.startTransaction();
         const reciever = await User.findOne({
-            email
+            phoneNumber
+        })
+        const sender = await User.findOne({
+            _id:req.user._id
         })
         
         if(!reciever){
@@ -63,20 +77,20 @@ router.post('/send', userVerification, async (req, res)=>{
             })
         }
 
-        if(pin != req.user.pin){
+        if(pin != sender.pin){
             return res.status(401).json({ 
                 success:false,
                 message:'Wrong pin'
             })
         }
 
-        sender_wallet.balance -= amount;
-        reciever_wallet.balance += amount;
+        sender_wallet.balance -= parseInt(amount);
+        reciever_wallet.balance += parseInt(amount);
 
         await sender_wallet.save()
         await reciever_wallet.save()
         
-        createTransaction(req.user._id, reciever._id, amount, 'SEND', 'COMPLETED');
+        createTransaction(req.user._id, req.user.name, reciever._id, reciever.name, req.user.phoneNumber, phoneNumber,  amount, 'SEND', 'COMPLETED');
 
         
 
@@ -104,6 +118,16 @@ router.post('/send', userVerification, async (req, res)=>{
     finally{
         //session.endSession();
     }
+})
+
+router.get('/transaction', userVerification, async (req, res)=>{
+    const user_id = req.user._id;
+    const phoneNumber= req.user.phoneNumber;
+    const transactionArray = await Transaction.find({$or:[{senderPhoneNumber:phoneNumber},{ recieverPhoneNumber:phoneNumber}]});
+    res.status(200).json({
+        transactionArray
+    })
+    
 })
 
 module.exports = router;

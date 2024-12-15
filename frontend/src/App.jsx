@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import {HomePage, Register, Login, Send, History} from './pages/Index'
+import {HomePage, Register, Login, Search, History, Send, Profile} from './pages/Index'
 
 
 export default function App() {
@@ -11,8 +11,10 @@ export default function App() {
             <Route path="/Home" element={<HomePage/>} />
             <Route path="/Register" element={<Register/>} />
             <Route path="/Login" element={<Login/>} />
-            <Route path="/Send" element={<Send/>} />
+            <Route path="/Search" element={<Search/>} />
             <Route path="/History" element={<History/>} />
+            <Route path="Send" element={<Send/>} />
+            <Route path="Profile" element={<Profile/>} />
           </Routes>
       </div>
     </div>

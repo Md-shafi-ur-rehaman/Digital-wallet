@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Navbar from '../components/Navbar'
 
@@ -12,9 +12,52 @@ import {
     EllipsisVertical,
      
 } from 'lucide-react'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
+import { useCookies } from 'react-cookie'
+
 
 
 function History() {
+    const navigate = useNavigate;
+    const [transaction, setTransaction] = useState([]);
+    const [user, setUser] = useState();
+    const [cookies, setCookie] = useCookies(['token']);
+
+    const getTransaction = async () => {
+        const {data} = await axios.get('http://localhost:3000/api/v1/transaction',{withCredentials:true});
+        setTransaction(data.transactionArray);
+    }
+    const getUser = async ()=>{
+        const response = await axios.get('http://localhost:3000/api/v1/user',{withCredentials:true})        
+        setUser(response.data.user);
+    }
+    const sortTransaction = ()=>[
+        transaction.forEach((tran)=>{
+            const date = new Date(tran.createdAt)
+            const tranDate = date.getDate() +" "+ date.toLocaleString('default', { month: 'long' }) + " " + date.getFullYear();
+            tran.createdAt = tranDate;
+        })
+    ]
+    
+    useEffect(()=>{
+        if(cookies){
+            if(!cookies.token){
+              return navigate("/login")
+            }
+            getTransaction();
+            getUser();
+            sortTransaction();
+          }
+          else{
+            return navigate("/login")
+          }
+        getTransaction();
+        getUser();
+    },[cookies, setCookie])
+
+    
+    
   return (
         <>
             <main className='flex-grow overflow-auto pt-4 pb-20 px-4 space-y-6'>
@@ -23,16 +66,10 @@ function History() {
                 <section>
                     <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold text-gray-800">Recent Transactions</h3>
-                    <a href="#" className="text-blue-600 text-sm">View All</a>
                     </div>
                     <div className="space-y-3">
-                    {[
-                        { id: 1, name: 'Spotify', amount: '-$12.99', type: 'Subscription' },
-                        { id: 2, name: 'Groceries', amount: '-$45.50', type: 'Shopping' },
-                        { id: 3, name: 'Salary', amount: '+$2500.00', type: 'Income' },
-                        { id: 4, name: 'Electricity Bill', amount: '-$85.30', type: 'Utilities' },
-                        { id: 5, name: 'Freelance Work', amount: '+$500.00', type: 'Income' }
-                    ].map(transaction => (
+                    
+                    {transaction && transaction.toReversed().map(transaction => (
                         <div 
                         key={transaction.id} 
                         className="bg-white rounded-lg p-4 flex justify-between items-center shadow-sm border"
@@ -42,12 +79,12 @@ function History() {
                             <CreditCard className="text-blue-600" size={20} />
                             </div>
                             <div>
-                            <p className="font-medium">{transaction.name}</p>
-                            <p className="text-sm text-gray-500">{transaction.type}</p>
+                            <p className="font-medium">{user && transaction.sender_id == user.id ? `Sent to ${transaction.recipientName}` : `Recieved from ${transaction.senderName}`}</p>
+                            <p className="text-sm text-gray-500">{transaction.createdAt}</p>
                             </div>
                         </div>
-                        <p className={`font-semibold ${transaction.amount.startsWith('-') ? 'text-red-500' : 'text-green-500'}`}>
-                            {transaction.amount}
+                        <p className={`font-semibold ${ user && transaction.sender_id == user.id ?  'text-red-500 ' : 'text-green-500 '}`}>
+                            {user && transaction.sender_id == user.id ? `-${transaction.amount}`: `+${transaction.amount}`}
                         </p>
                         </div>
                     ))}

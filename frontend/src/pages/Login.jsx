@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { User, Mail, Phone, Lock, Shield } from 'lucide-react';
 import InputFeild from '../components/InputFeild';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
 
 
 
@@ -16,7 +17,18 @@ const apiClient = axios.create({
 
 // Registration Component
 const Login = () => {
+  const [cookies, setCookie] = useCookies(['token'])
 
+  useEffect(() => {
+    if(cookies){
+      if(!cookies.token){
+        return navigate("/login")
+      }
+    }
+    else{
+      return navigate("/login")
+    }
+  }, [cookies, setCookie]);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -70,7 +82,6 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData)
     
     // Reset previous states
     setApiError(null);
@@ -93,7 +104,6 @@ const Login = () => {
       },
       {withCredentials:true}
       );
-      console.log(response);
       // Handle successful registration
       setLoginSuccess(true);
       
@@ -110,7 +120,7 @@ const Login = () => {
 
       // Optional: You might want to redirect or show a success message
       alert('Login Successful!');
-      navigate('/');
+      return navigate('/home');
 
     } catch (error) {
       // Handle registration errors
@@ -134,7 +144,7 @@ const Login = () => {
     <div className="min-h-screen bg-gray-0 flex items-center justify-center p-4">
       <div className="bg-white shadow-lg rounded-lg w-full max-w-md p-8">
         <h2 className="text-2xl font-bold text-center mb-6 text-blue-600">
-          User Registration
+          Login
         </h2>
         
         {/* API Error Message */}
@@ -147,7 +157,7 @@ const Login = () => {
         {/* Registration Success Message */}
         {loginSuccess && (
           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <span className="block sm:inline">Registration Successful!</span>
+            <span className="block sm:inline">login Successful!</span>
           </div>
         )}
         
@@ -186,6 +196,7 @@ const Login = () => {
           >
             {isLoading ? 'logining...' : 'login'}
           </button>
+          <p>Dont have an Account? <Link to='/register' className='text-blue-600'>Register here</Link></p>
 
         </form>
       </div>

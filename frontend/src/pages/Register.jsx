@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { User, Mail, Phone, Lock, Shield } from 'lucide-react';
 import InputFeild from '../components/InputFeild';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
 
 
 
@@ -16,6 +17,18 @@ const apiClient = axios.create({
 
 // Registration Component
 const Register = () => {
+  const [cookies, setCookie] = useCookies(['token'])
+
+  useEffect(() => {
+    if(cookies){
+      if(!cookies.token){
+        return navigate("/register")
+      }
+    }
+    else{
+      return navigate("/register")
+    }
+  }, [cookies, setCookie]);
 
   const navigate = useNavigate();
 
@@ -101,7 +114,6 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData)
     
     // Reset previous states
     setApiError(null);
@@ -127,7 +139,6 @@ const Register = () => {
       },
       {withCredentials:true}
       );
-      console.log(response);
       // Handle successful registration
       setRegistrationSuccess(true);
       
@@ -256,7 +267,7 @@ const Register = () => {
           >
             {isLoading ? 'Registering...' : 'Register'}
           </button>
-
+          <p>Already have an Account? <Link to='/login' className="text-blue-600">Login here</Link></p>
         </form>
       </div>
     </div>

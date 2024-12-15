@@ -5,6 +5,7 @@ const Wallet = require("../models/wallet");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const userVerification = require("../middlewares/userVerification");
+const authMiddleware = require("../middlewares/authMiddleware")
 
 const router = express.Router();
 
@@ -15,6 +16,64 @@ const signupBody = zod.object({
     password: zod.string(),
     pin: zod.number()
 });
+
+router.get("/", async (req, res)=>{
+  try {
+    // Retrieve token from cookies
+    const token = req.cookies.token;
+
+    // Check if token exists
+    if (!token) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'No authentication token, authorization denied.' 
+      });
+    }
+
+    // Verify token
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    
+    
+    // If verified, find user (assuming you have a user model)
+    const user = await User.findOne({email: verified.email}).select('-password').select('-pin');
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'User not found' 
+      });
+    };
+
+    // Attach user to request object
+    res.status(200).json({
+      success:true,
+      message:'successfull'
+    })
+  }catch(err){
+    return res.status(401).json({ 
+      success: false, 
+      message: err 
+    });
+  }
+})
+
+router.post("/search", async(req, res)=>{
+  const phoneNumber = req.body.phoneNumber;
+  const user = await User.findOne({phoneNumber});
+
+  if(!user){
+    return res.json({
+      name:null,
+      isValid:false,
+    })
+  }
+  
+  res.status(200).json({
+    name:user.name,
+    phoneNumber:phoneNumber,
+    isValid:true,
+  })
+})
 
 router.post("/register", async (req, res) => {
     // const { success } = signupBody.safeParse(req.body);
@@ -105,11 +164,25 @@ router.post('/login', async (req, res)=>{
 // Route to get user profile
 router.get('/user/profile', userVerification, (req, res) => {
   // req.user is available from the verification middleware
-  res.json({
+  res.status(200).json({
     success: true,
     user: {
       id: req.user._id,
       username: req.user.username,
+      email: req.user.email,
+      name: req.user.name,
+      // Include other non-sensitive user information
+    }
+  });
+});
+
+router.get('/user', userVerification, (req, res) => {
+  // req.user is available from the verification middleware
+  res.json({
+    success: true,
+    user: {
+      id: req.user._id,
+      phoneNumber:req.user.phoneNumber,
       email: req.user.email,
       name: req.user.name,
       // Include other non-sensitive user information
