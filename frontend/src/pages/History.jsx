@@ -25,11 +25,11 @@ function History() {
     const [cookies, setCookie] = useCookies(['token']);
 
     const getTransaction = async () => {
-        const {data} = await axios.get('http://localhost:3000/api/v1/transaction',{withCredentials:true});
+        const {data} = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/transaction`,{withCredentials:true});
         setTransaction(data.transactionArray);
     }
     const getUser = async ()=>{
-        const response = await axios.get('http://localhost:3000/api/v1/user',{withCredentials:true})        
+        const response = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/user`,{withCredentials:true})        
         setUser(response.data.user);
     }
     const sortTransaction = ()=>[

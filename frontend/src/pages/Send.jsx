@@ -67,7 +67,7 @@ function Send() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/v1/send",
+        `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/send`,
         {
           phoneNumber: state.phoneNumber,
           amount,

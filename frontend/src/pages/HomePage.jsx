@@ -22,7 +22,7 @@ function HomePage() {
     const [user, setUser] = useState(null);
 
     const getDetails = async () => {
-      const { data } = await axios.get('http://localhost:3000/api/v1/balance', {
+      const { data } = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/balance`, {
         withCredentials: true,
       });
       if(!data.success){
@@ -34,11 +34,11 @@ function HomePage() {
     };
 
     const getTransaction = async () => {
-      const {data} = await axios.get('http://localhost:3000/api/v1/transaction',{withCredentials:true});
+      const {data} = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/transaction`,{withCredentials:true});
       setTransaction(data.transactionArray);
     }
     const getUser = async ()=>{
-      const response = await axios.get('http://localhost:3000/api/v1/user',{withCredentials:true})          
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/user`,{withCredentials:true})          
       setUser(response.data.user);
     }
     const sortTransaction = ()=>{

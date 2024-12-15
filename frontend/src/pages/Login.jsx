@@ -9,7 +9,7 @@ import { useCookies } from 'react-cookie';
 
 // API Client Configuration
 const apiClient = axios.create({
-  baseURL: 'http://localhost:3000/api/v1',
+  baseURL: `${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1`,
   headers: {
     'Content-Type': 'application/json',
   },

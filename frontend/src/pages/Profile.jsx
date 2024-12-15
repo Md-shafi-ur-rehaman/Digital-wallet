@@ -9,7 +9,7 @@ function Profile() {
     const avatar = "https://api.dicebear.com/8.x/avataaars/svg?seed=john"
     const [user, setUser] = useState(null);
     const getDetails = async () => {
-        const { data } = await axios.get('http://localhost:3000/api/v1/user/profile', {
+        const { data } = await axios.get(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/user/profile`, {
           withCredentials: true,
         });
         

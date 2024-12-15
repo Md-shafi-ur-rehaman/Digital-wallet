@@ -55,7 +55,7 @@ function Search() {
     setError(null);
 
     try {
-      const response = await axios.post('http://localhost:3000/api/v1/search', { 
+      const response = await axios.post(`${import.meta.env.VITE_REACT_APP_BACKEND_BASEURL}/api/v1/search`, { 
         phoneNumber: number 
       }, {
         headers: {
