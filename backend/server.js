@@ -25,11 +25,6 @@ app.use('/api/v1/',userRoute);
 app.use('/api/v1/',transactionRoute);
 
 
-app.get('/',(req, res)=>{
-    res.json({
-        message:"welcome"
-    }).status(200);
-})
 
 app.listen(3000,()=>{
   connectDB();
