@@ -4,8 +4,7 @@ const User = require("../models/user");
 const Wallet = require("../models/wallet");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const userVerification = require("../middlewares/userVerification");
-const authMiddleware = require("../middlewares/authMiddleware")
+const verifyUserToken = require("../middlewares/userVerification");
 
 const router = express.Router();
 
@@ -132,8 +131,8 @@ router.post('/login', async (req, res)=>{
     //     message: "Incorrect inputs",
     //   });
     // }
+    
     const {email, password} = req.body;
-
     const user = await User.findOne({email});
     
     
@@ -162,7 +161,7 @@ router.post('/login', async (req, res)=>{
 })
 
 // Route to get user profile
-router.get('/user/profile', userVerification, (req, res) => {
+router.get('/user/profile', verifyUserToken, (req, res) => {
   // req.user is available from the verification middleware
   res.status(200).json({
     success: true,
@@ -176,7 +175,7 @@ router.get('/user/profile', userVerification, (req, res) => {
   });
 });
 
-router.get('/user', userVerification, (req, res) => {
+router.get('/user', verifyUserToken, (req, res) => {
   // req.user is available from the verification middleware
   res.json({
     success: true,
