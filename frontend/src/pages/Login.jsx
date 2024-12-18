@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { User, Mail, Phone, Lock, Shield } from 'lucide-react';
+import {  Mail,  Lock,  } from 'lucide-react';
 import InputFeild from '../components/InputFeild';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
@@ -86,24 +86,25 @@ const Login = () => {
     // Reset previous states
     setApiError(null);
     setLoginSuccess(false);
-
+    
     // Validate form
     if (!validateForm()) {
       return;
     }
-
+    
     // Start loading
     setIsLoading(true);
-
+    
     try {
-
+      
       // Send registration request
-      const response = await apiClient.post('/login', {
+      const response = await axios.post('http://localhost:3000/api/v1/login', {
         email: formData.email,
         password: formData.password,
       },
       {withCredentials:true}
       );
+      
       // Handle successful registration
       setLoginSuccess(true);
       
